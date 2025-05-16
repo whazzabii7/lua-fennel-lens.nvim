@@ -17,9 +17,19 @@ function M.setup()
       (#eq? @_fennel_identifier "eval"))
   ]]
 
+  -- Ensure Treesitter is installed and the query is applied correctly
   local ok, ts_query = pcall(require, "vim.treesitter.query")
   if ok and ts_query then
-    ts_query.set("lua", "injections", fennel_injection)
+    -- Retrieve existing queries for Lua injections
+    local current_queries = ts_query.get("lua", "injections")
+
+    -- Append the custom query for Fennel injection to the existing ones
+    local updated_queries = current_queries .. "\n" .. fennel_injection
+
+    -- Set the updated queries back to Lua injections
+    ts_query.set("lua", "injections", updated_queries)
+  else
+    print("Error: Treesitter query module is not available or failed to load.")
   end
 end
 
