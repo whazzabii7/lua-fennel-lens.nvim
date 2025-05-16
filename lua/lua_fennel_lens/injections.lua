@@ -15,7 +15,10 @@ function M.setup()
     )
   ]]
 
-  ts_query.set("lua", "injections", fennel_injection)
+  local _, ts_query = pcall(require, "vim.treesitter.query")
+  if ts_query then
+    ts_query.set("lua", "injections", fennel_injection)
+  end
 end
 
 return M
