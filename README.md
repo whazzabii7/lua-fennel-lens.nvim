@@ -1,6 +1,6 @@
-# fennel-lens.nvim
+# lua-fennel-lens.nvim
 
-**fennel-lens.nvim** adds syntax highlighting and (optional) LSP support for embedded Fennel code inside Lua files. It specifically targets use cases where Fennel is evaluated inline via `fennel.eval(...)`, allowing you to write and maintain hybrid Lua/Fennel code with better developer tooling in Neovim.
+**lua-fennel-lens.nvim** adds syntax highlighting and (optional) LSP support for embedded Fennel code inside Lua files. It specifically targets use cases where Fennel is evaluated inline via `fennel.eval(...)`, allowing you to write and maintain hybrid Lua/Fennel code with better developer tooling in Neovim.
 
 ## Features
 
@@ -21,9 +21,9 @@ Use your favorite plugin manager:
 
 ```lua
 {
-  "yourname/fennel-lens.nvim",
+  "whazzabii7/lua-fennel-lens.nvim",
   config = function()
-    require("fennel_lens").setup()
+    require("lua_fennel_lens").setup()
   end,
 }
 ```
@@ -32,7 +32,7 @@ Use your favorite plugin manager:
 
 ```lua
 use({
-  "yourname/fennel-lens.nvim",
+  "whazzabii7/lua-fennel-lens.nvim",
   config = function()
     require("fennel_lens").setup()
   end,
