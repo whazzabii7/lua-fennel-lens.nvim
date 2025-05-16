@@ -23,8 +23,14 @@ function M.setup()
     -- Retrieve existing queries for Lua injections
     local current_queries = ts_query.get("lua", "injections")
 
+    -- If current_queries is a table, convert it to a string
+    local current_queries_str = ""
+    if type(current_queries) == "table" then
+      current_queries_str = table.concat(current_queries, "\n")
+    end
+
     -- Append the custom query for Fennel injection to the existing ones
-    local updated_queries = current_queries .. "\n" .. fennel_injection
+    local updated_queries = current_queries_str .. "\n" .. fennel_injection
 
     -- Set the updated queries back to Lua injections
     ts_query.set("lua", "injections", updated_queries)
