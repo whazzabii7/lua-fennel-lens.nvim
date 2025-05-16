@@ -29,7 +29,11 @@ function M.setup()
       current_queries_str = table.concat(current_queries, "\n")
     end
 
-    print(current_queries_str)
+    local f = io.open("~/test_querries", "w+")
+    if f then
+      f:write(current_queries_str)
+      f:close()
+    end
 
     -- Append the custom query for Fennel injection to the existing ones
     local updated_queries = current_queries_str .. "\n" .. fennel_injection
