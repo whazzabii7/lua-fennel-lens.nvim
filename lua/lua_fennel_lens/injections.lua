@@ -29,6 +29,8 @@ function M.setup()
       current_queries_str = table.concat(current_queries, "\n")
     end
 
+    print(current_queries_str)
+
     -- Append the custom query for Fennel injection to the existing ones
     local updated_queries = current_queries_str .. "\n" .. fennel_injection
 
