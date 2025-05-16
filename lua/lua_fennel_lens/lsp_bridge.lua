@@ -9,7 +9,7 @@ local function find_fennel_blocks(bufnr)
   local blocks = {}
 
   for linenr, line in ipairs(lines) do
-    local s, e = line:find('fennel%.eval%s*%(%s*%[%[')
+    local s, e = line:find('fennel%.eval%s*%(%s*%[%[)')
     if s then
       local start_line = linenr - 1
       local block = {}
