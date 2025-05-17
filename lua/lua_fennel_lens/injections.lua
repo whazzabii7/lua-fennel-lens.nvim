@@ -1,7 +1,18 @@
 -- lua/fennel_lens/injections.lua
 local M = {}
 
+local function get_query_source(lang, query_type)
+  local files = vim.treesitter.query.get_files(lang, query_type)
+  local combined = {}
+  for _, file in ipairs(files) do
+    local lines = vim.fn.readfile(file)
+    vim.list_extend(combined, lines)
+  end
+  return table.concat(combined, "\n")
+end
+
 function M.setup()
+  local base = get_query_source("lua", "injections")
   local fennel_injection = [[
     ((function_call
       name: [
@@ -17,26 +28,7 @@ function M.setup()
       (#eq? @_fennel_identifier "eval"))
   ]]
 
-  -- Ensure Treesitter is installed and the query is applied correctly
-  local ok, ts_query = pcall(require, "vim.treesitter.query")
-  if ok and ts_query then
-    -- Retrieve existing queries for Lua injections
-    local current_queries = ts_query.get("lua", "injections")
-
-    -- If current_queries is a table, convert it to a string
-    local current_queries_str = ""
-    if type(current_queries) == "table" then
-      current_queries_str = table.concat(current_queries, "\n")
-    end
-
-    -- Append the custom query for Fennel injection to the existing ones
-    local updated_queries = current_queries_str .. "\n" .. fennel_injection
-
-    -- Set the updated queries back to Lua injections
-    ts_query.set("lua", "injections", updated_queries)
-  else
-    print("Error: Treesitter query module is not available or failed to load.")
-  end
+  vim.treesitter.query.set("lua", "injections", base.."\n"..fennel_injection)
 end
 
 return M
