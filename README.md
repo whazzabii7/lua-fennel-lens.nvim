@@ -9,6 +9,8 @@
 - No configuration required for basic highlighting.
 - Designed for performance and extensibility.
 
+The lsp-bridge is still under development, for now the syntax highlighting is the only feature that works.
+
 ## Motivation
 
 Fennel is often embedded inside Lua using `fennel.eval`. However, most tools do not recognize or highlight this inline code properly. This plugin acts like a "lens" that reveals the structure and meaning of embedded Fennel, similar to how `ffi.cdef` enables embedded C in Lua.
