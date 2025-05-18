@@ -1,44 +1,9 @@
 local M = {}
 
 local ts = vim.treesitter
-local namespace_id = vim.api.nvim_create_namespace("fennel_lsp_bridge")
-local fennel_lsp_client_id = nil
-local handler_initialized = false
 local virtual_buffers = {}
+-- local namespace_id = vim.api.nvim_create_namespace("fennel_lsp_bridge")
 
--- Diagnostic handler
-local function setup_diagnostic_handler()
-  if handler_initialized then return end
-  handler_initialized = true
-
-  vim.lsp.handlers["textDocument/publishDiagnostics"] = function(_, result, ctx, _)
-    if not result or not result.diagnostics then return end
-
-    local bufnr = vim.uri_to_bufnr(result.uri)
-    if not vim.api.nvim_buf_is_loaded(bufnr) then return end
-
-    local diagnostics = result.diagnostics
-    local meta = vim.b[bufnr].fennel_lens_meta
-
-    if meta then
-      local adjusted = {}
-      for _, d in ipairs(diagnostics) do
-        if d.range and d.range.start and d.range["end"]
-          and d.range.start.line and d.range["end"].line then
-          d.range.start.line = d.range.start.line + meta.line_offset
-          d.range["end"].line = d.range["end"].line + meta.line_offset
-          table.insert(adjusted, d)
-        end
-      end
-      vim.diagnostic.set(namespace_id, meta.original_bufnr, adjusted, {})
-    else
-      -- Let Lua (and others) handle their diagnostics normally
-      vim.lsp.diagnostic.on_publish_diagnostics(_, result, ctx)
-    end
-  end
-end
-
--- Extract embedded fennel blocks
 local function extract_fennel_blocks(bufnr)
   bufnr = bufnr or vim.api.nvim_get_current_buf()
   local parser = ts.get_parser(bufnr, "lua") or vim.treesitter.languagetree.new(bufnr, "lua")
@@ -79,50 +44,27 @@ local function extract_fennel_blocks(bufnr)
   return code_blocks
 end
 
--- Send code to fennel LSP
-local function send_to_lsp(code_block, original_bufnr)
-  local key = original_bufnr .. ":" .. code_block.range[1]
-  local fennel_buf = virtual_buffers[key]
+local function update_virtual_buffers(blocks, original_bufnr)
+  for _, block in ipairs(blocks) do
+    local key = original_bufnr .. ":" .. block.range[1]
+    local virt_buf = virtual_buffers[key]
 
-  if fennel_buf == nil or not vim.api.nvim_buf_is_valid(fennel_buf) then
-    fennel_buf = vim.api.nvim_create_buf(false, true)
-    virtual_buffers[key] = fennel_buf
-  end
+    if not virt_buf or not vim.api.nvim_buf_is_valid(virt_buf) then
+      virt_buf = vim.api.nvim_create_buf(false, true)
+      virtual_buffers[key] = virt_buf
 
-  -- Immer aktualisieren, auch wenn Buffer schon existiert
-  local lines = vim.split(code_block.code, "\n")
-  vim.api.nvim_buf_set_lines(fennel_buf, 0, -1, false, lines)
-  vim.bo[fennel_buf].filetype = "fennel"
+      -- Set name on create
+      local name = "fennel-lens://" .. original_bufnr .. "/" .. block.range[1]
+      vim.api.nvim_buf_set_name(virt_buf, name)
+    end
 
-  -- Setze verständlichen Namen
-  local name = "fennel-lens://" .. original_bufnr .. "/" .. code_block.range[1]
-  vim.api.nvim_buf_set_name(fennel_buf, name)
+    local lines = vim.split(block.code, "\n")
+    vim.api.nvim_buf_set_lines(virt_buf, 0, -1, false, lines)
+    vim.bo[virt_buf].filetype = "fennel"
 
-  -- Setze Metadaten immer neu
-  vim.b[fennel_buf].fennel_lens_meta = {
-    original_bufnr = original_bufnr,
-    line_offset = code_block.range[1],
-  }
-
-  local function attach_handler(client_id)
-    vim.lsp.buf_attach_client(fennel_buf, client_id)
-  end
-
-  if fennel_lsp_client_id and vim.lsp.get_client_by_id(fennel_lsp_client_id) then
-    attach_handler(fennel_lsp_client_id)
-  else
-    vim.lsp.start({
-      name = "fennel_lsp",
-      cmd = { "fennel-ls" },
-      root_dir = vim.fn.getcwd(),
-      on_attach = function(client, _)
-        fennel_lsp_client_id = client.id
-        attach_handler(client.id)
-      end,
-    })
+    print("Created virtual buffer:", virt_buf, name)
   end
 end
-
 
 -- For testing: print extracted fennel blocks
 function M.test()
@@ -132,18 +74,14 @@ end
 -- Main update function
 function M.update()
   local bufnr = vim.api.nvim_get_current_buf()
-  vim.diagnostic.reset(namespace_id, bufnr)
+--   vim.diagnostic.reset(namespace_id, bufnr)
 
   local blocks = extract_fennel_blocks(bufnr)
-  for _, block in ipairs(blocks) do
-    send_to_lsp(block, bufnr)
-  end
+  update_virtual_buffers(blocks, bufnr)
 end
 
 -- Setup autocommands and diagnostic handler
 function M.setup()
-  setup_diagnostic_handler()
-
   vim.api.nvim_create_autocmd({ "BufWritePost", "CursorHold" }, {
     pattern = "*.lua",
     callback = function()
