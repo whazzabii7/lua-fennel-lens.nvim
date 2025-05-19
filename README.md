@@ -61,7 +61,7 @@ The body of the `fennel.eval` call will now be syntax-highlighted as Fennel.
 
 ## LSP Support (Experimental)
 
-A future version of this plugin will support inline LSP features for Fennel code, by extracting the content into virtual buffers or temporary `.fnl` files and attaching a Fennel language server.
+This version of this plugin supports inline LSP features for Fennel code, by extracting the content into virtual buffers and attaching a Fennel language server.
 
 This functionality will be opt-in and focused on performance and minimal distraction.
 
