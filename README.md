@@ -2,6 +2,13 @@
 
 **lua-fennel-lens.nvim** adds syntax highlighting and (optional) LSP support for embedded Fennel code inside Lua files. It specifically targets use cases where Fennel is evaluated inline via `fennel.eval(...)`, allowing you to write and maintain hybrid Lua/Fennel code with better developer tooling in Neovim.
 
+## TODOs
+
+There are still some clean up to do:
+- make code cleaner
+- lua LSP don't "sees" the definition of fennel funktions, so you still get undefined global warning
+- make features optional (both syntax highlighting and LSP bridge, so you can use what you need)
+
 ## Features
 
 - Treesitter-based syntax highlighting for Fennel code inside `fennel.eval(...)` strings.
