@@ -8,6 +8,7 @@ There are still some clean up to do:
 - make code cleaner
 - lua LSP don't "sees" the definition of fennel funktions, so you still get undefined global warning
 - make features optional (both syntax highlighting and LSP bridge, so you can use what you need)
+- maybe I will add a "translation" for documentation trigger, so vim.lsp.buf.hover() sends infos from virtual buffer to main buffer.
 
 ## Features
 
